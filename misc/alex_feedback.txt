@@ -1,0 +1,20 @@
+* My understanding 
+
+Transition from previous framework to: "When presented with summary statistics about past responses to a question, people will be less likely to answer 'I don't know'". 
+
+* Thoughts 
+1. Yes, I like that both of you are being prudent in the design of your experiment. I like that you're scaling things down into a size that seems managable, and likely to succeed.
+
+2. What covariates do you anticipate will affect responses? Are you going to collect these before or after your treatment? Consider how durable they are, and whether they are likely to be shaped by your application of treatment.
+
+3. I think that you /should/ pilot this, because you need to know that people are willing to hit the don't know option.
+
+4. Relatedly, Are you going to read the don't know option to respondents? Or, are you going to leave it implicit? These two features might have a pretty strong rate on the propensity for peole to hit "I dont' know" and you want some people to make guesses. 
+
+5. What information are you going to provide the subjects about the "fictionalized" previous answers? Are you going to make clear that the responses come from people who are in the same position as the subject (people on the street), or is it going to look like zoologists?
+
+6. How do you envision recruiting people? If you do it in person, can you take a convienience sample of people from the Irving Spectrum? Will the Spectrum throw you out? I think this can work, so long as you get baseline characteristics of people.
+
+7. Can you be certain to look for heterogeneous effects of some type? This is a good, clean design, so I would like to see if you observe different effects in different classes of people. Like, are men or women less likely to state "I don't know."
+
+8. As you're writing this, is your variation between subjects or within subjects? Does one work better for you? What are the benefits to within subjects design, and what are the threats to validity for this experiment of this design? 
