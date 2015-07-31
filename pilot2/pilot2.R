@@ -1,6 +1,6 @@
 # Load data files downloaded from Qualtrics and Amazon
-turk_data <- read.csv("~/Dropbox/Public/W241/Pilot 2 Data/Batch_2038863_batch_results.csv", header=TRUE, sep=",")
-qualtrics_data <- read.csv("~/Dropbox/Public/W241/Pilot 2 Data/W241_Final_Pilot_2.csv", header=TRUE, sep=",")
+turk_data <- read.csv("Batch_2038863_batch_results.csv", header=TRUE, sep=",")
+qualtrics_data <- read.csv("W241_Final_Pilot_2.csv", header=TRUE, sep=",")
 
 # Make sure we have a like-named column for joining the two data sets together
 qualtrics_data$surveycode = qualtrics_data$random
