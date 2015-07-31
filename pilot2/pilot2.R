@@ -94,24 +94,32 @@ pilot_clean$degree = as.integer(pilot_clean$bachelors == 'Yes')
 pilot_clean$helpful_treated = as.integer(pilot_clean$helpful != 'I did not see any statistics')
 
 # Not sure if I should use age or adjusted age here...?
+# Adjusted age produces a more intuitive intercept value, but adds the cognitive
+# overhead of using 24 as the base age. Raw age looks weird because intercept
+# for pilot 2 data winds up being 13, which is an impossible value all on its
+# own.
 pilot_clean$age_adjusted = pilot_clean$age - min(pilot_clean$age)
-pilot_clean$age_adjusted
+# pilot_clean$age_adjusted
 
 
 
-summary(lm(total_score ~ moderate + strong + degree + age_adjusted + male, pilot_clean))
 
 
-# View individual question responses
-table(pilot_clean$animal1) # 0 llama + many deer/emu/alpaca
-table(pilot_clean$animal2) # 1 Gerboa + many mouse/rat
-table(pilot_clean$animal3) # Many rat/possum
-table(pilot_clean$animal4) # 3 wombat
-table(pilot_clean$animal5) # 2 axolotl
-table(pilot_clean$animal6) # 1 axolotl
-table(pilot_clean$animal7) # 
-table(pilot_clean$animal8) # 
-table(pilot_clean$animal9) # 3 shark + 6 eel
-table(pilot_clean$animal10) # 1 blue dragon
+# Data Analysis
 
+
+# Simplest regression
+summary(lm(total_score ~ treatment, pilot_clean))
+
+# Separate the 2 levels of treatment
+summary(lm(total_score ~ moderate + strong, pilot_clean))
+
+# Add covariates
+summary(lm(total_score ~ moderate + strong + male + degree + age_adjusted, pilot_clean))
+
+# Test interaction hypothesis of treatment + male
+summary(lm(total_score ~ treatment * male, pilot_clean))
+
+# Test interaction hypothesis of treatment + degree
+summary(lm(total_score ~ treatment * degree, pilot_clean))
 
