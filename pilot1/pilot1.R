@@ -1,7 +1,7 @@
 library("MTurkR")
 
 # Authenticate
-aws_credentials <- credentials(c("AKIAJTVF2RT7IDZQGOVQ", "Rroub72aeMC66dMB89Il70YWFyuVui5g+tRHLwc7"))
+aws_credentials <- credentials(c("", ""))
 
 # Ingest
 turk_data <- GetAssignments(hit="39O0SQZVJNKMHO43TZPRM5XC6YL7RY", return.all=TRUE)
