@@ -102,8 +102,8 @@ pilot_clean$age_adjusted = pilot_clean$age - min(pilot_clean$age)
 # pilot_clean$age_adjusted
 
 
-
-
+pilot_clean$over_thirty = as.integer(pilot_clean$age > 30)
+pilot_clean$over_thirty
 
 # Data Analysis
 
@@ -122,4 +122,7 @@ summary(lm(total_score ~ treatment * male, pilot_clean))
 
 # Test interaction hypothesis of treatment + degree
 summary(lm(total_score ~ treatment * degree, pilot_clean))
+
+# Test interaction hypothesis of treatment + age over thirty
+summary(lm(total_score ~ treatment * over_thirty, pilot_clean))
 
