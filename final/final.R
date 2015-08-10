@@ -74,7 +74,13 @@ idk <- function(text) {
 }
 
 
-# Score the responses
+idk_or_blank <- function(text) {
+  return(as.integer(idk(text) | text == ""))
+}
+
+
+
+# Score the responses (assuming blank != idk)
 pilot_clean$animal1_score = idk(pilot_clean$animal1)
 pilot_clean$animal2_score = idk(pilot_clean$animal2)
 pilot_clean$animal3_score = idk(pilot_clean$animal3)
@@ -87,11 +93,33 @@ pilot_clean$animal9_score = idk(pilot_clean$animal9)
 pilot_clean$animal10_score = idk(pilot_clean$animal10)
 
 
-# Generate a total score. This is our outcome variable!
+# Score the responses (assuming blank == idk)
+pilot_clean$animal1_score_idk = idk_or_blank(pilot_clean$animal1)
+pilot_clean$animal2_score_idk = idk_or_blank(pilot_clean$animal2)
+pilot_clean$animal3_score_idk = idk_or_blank(pilot_clean$animal3)
+pilot_clean$animal4_score_idk = idk_or_blank(pilot_clean$animal4)
+pilot_clean$animal5_score_idk = idk_or_blank(pilot_clean$animal5)
+pilot_clean$animal6_score_idk = idk_or_blank(pilot_clean$animal6)
+pilot_clean$animal7_score_idk = idk_or_blank(pilot_clean$animal7)
+pilot_clean$animal8_score_idk = idk_or_blank(pilot_clean$animal8)
+pilot_clean$animal9_score_idk = idk_or_blank(pilot_clean$animal9)
+pilot_clean$animal10_score_idk = idk_or_blank(pilot_clean$animal10)
+
+
+
+
+
+# Generate total scores. This is our outcome variable!
 pilot_clean$total_score = (pilot_clean$animal1_score + pilot_clean$animal2_score + pilot_clean$animal3_score
                         + pilot_clean$animal4_score + pilot_clean$animal5_score + pilot_clean$animal6_score
                         + pilot_clean$animal7_score + pilot_clean$animal8_score + pilot_clean$animal9_score
                         + pilot_clean$animal10_score)
+
+pilot_clean$total_score_idk = (pilot_clean$animal1_score_idk + pilot_clean$animal2_score_idk + pilot_clean$animal3_score_idk
+                           + pilot_clean$animal4_score_idk + pilot_clean$animal5_score_idk + pilot_clean$animal6_score_idk
+                           + pilot_clean$animal7_score_idk + pilot_clean$animal8_score_idk + pilot_clean$animal9_score_idk
+                           + pilot_clean$animal10_score_idk)
+
 
 
 # Helpful dummy variables for identifying the different assignments
@@ -127,6 +155,8 @@ pilot_clean$over_thirty
 
 # Simplest regression
 summary(lm(total_score ~ treatment, pilot_clean))
+summary(lm(total_score_idk ~ treatment, pilot_clean))
+
 
 # Separate the 2 levels of treatment
 summary(lm(total_score ~ moderate + strong, pilot_clean))
