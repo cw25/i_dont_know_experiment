@@ -182,8 +182,8 @@ library(sandwich)
 # counted as IDKs. Having fewer IDKs in treatment will cause the CACE to be
 # overestimated, so we refer to it as the "upper" model since it will become the
 # upper bound in our extreme value bounds.
-model_excl = ivreg(total_score_excl ~ complied + male + age + over_thirty, 
-                                    ~ treatment + male + age + over_thirty,
+model_excl = ivreg(total_score_excl ~ complied + male + degree + over_thirty, 
+                                    ~ treatment + male + degree + over_thirty,
                                     data=final_clean)
 upper_model = summary(model_excl)
 upper_model
@@ -204,8 +204,8 @@ ci_upper
 
 
 # Now run the same model for the "lower" estimate
-model_incl = ivreg(total_score_incl ~ complied + male + age + over_thirty,
-                                    ~ treatment + male + age + over_thirty,
+model_incl = ivreg(total_score_incl ~ complied + male + degree + over_thirty,
+                                    ~ treatment + male + degree + over_thirty,
                                     data=final_clean)
 lower_model = summary(model_incl)
 lower_model
@@ -222,5 +222,45 @@ lower_robust_se
 ci_lower = lower_bound_cace + (1.96 * lower_robust_se)
 ci_lower
 
+
+
+
+# Use the inclusive model since it represents the lesser effect (stay conservative)
+# and investigate the additional hypotheses
+
+
+# Hypothesis 2: Seeing highly confident summary statistics will lead to a greater reduction in IDK
+# responses than seeing moderately confident summary statistics
+model_h2 = ivreg(total_score_incl ~ strong_complied + moderate_complied + male + degree + over_thirty,
+                                    ~ strong + moderate + male + degree + over_thirty,
+                                    data=final_clean)
+summary(model_h2)
+# Myth: BUSTED
+
+
+
+# Hypotheses 3: Males under treatment will be even less likely than females to answer IDK
+model_h3 = ivreg(total_score_incl ~ complied * male,
+                 ~ treatment * male,
+                 data=final_clean)
+summary(model_h3)
+# Myth: BUSTED, but reason to think twice about it with 0.12 p-value
+
+
+
+# Hypotheses 4: Holders of 4-year college degrees will be even more likely to answer IDK
+model_h4 = ivreg(total_score_incl ~ complied * degree,
+                 ~ treatment * degree,
+                 data=final_clean)
+summary(model_h4)
+# Myth: BUSTED, apparently a lot of variance
+
+
+# Hypotheses 5: 
+model_h5 = ivreg(total_score_incl ~ complied * over_thirty,
+                 ~ treatment * over_thirty,
+                 data=final_clean)
+summary(model_h5)
+# Myth: Seriously BUSTED
 
 
