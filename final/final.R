@@ -8,14 +8,14 @@ qualtrics_data$surveycode = qualtrics_data$random
 turk_data$surveycode = turk_data$Answer.surveycode
 
 # Join (note: respondents recruited outside of Turk won't have data in the Amazon file)
-pilot_data_joined <- merge(turk_data, qualtrics_data, all.y = TRUE, by=c("surveycode") ) 
+final_data_joined <- merge(turk_data, qualtrics_data, all.y = TRUE, by=c("surveycode") ) 
 
 
 # Distill/Clean
 
 
 # Limit to the subset of data necessary for the analysis
-pilot_clean = pilot_data_joined[, c(
+final_clean = final_data_joined[, c(
   "group",
   "What.is.your.gender.",
   "What.is.your.age.",
@@ -35,18 +35,18 @@ pilot_clean = pilot_data_joined[, c(
 
 
 # Simplify the column names
-colnames(pilot_clean) = c(
+colnames(final_clean) = c(
   "group", "gender", "age", "bachelors", "animal1", "animal2", "animal3", "animal4", "animal5",
   "animal6", "animal7", "animal8", "animal9", "animal10", "helpful"
 )
 
 
 # Inspect the IDK values so we can catch and score them properly
-idk_responses = c(as.character(pilot_clean$animal1), as.character(pilot_clean$animal2),
-                  as.character(pilot_clean$animal3), as.character(pilot_clean$animal4),
-                  as.character(pilot_clean$animal5), as.character(pilot_clean$animal6),
-                  as.character(pilot_clean$animal7), as.character(pilot_clean$animal8),
-                  as.character(pilot_clean$animal9))
+idk_responses = c(as.character(final_clean$animal1), as.character(final_clean$animal2),
+                  as.character(final_clean$animal3), as.character(final_clean$animal4),
+                  as.character(final_clean$animal5), as.character(final_clean$animal6),
+                  as.character(final_clean$animal7), as.character(final_clean$animal8),
+                  as.character(final_clean$animal9))
 
 # View responses
 sort(unique(idk_responses))
@@ -74,102 +74,149 @@ idk <- function(text) {
 }
 
 
-idk_or_blank <- function(text) {
+idk_including_blank <- function(text) {
   return(as.integer(idk(text) | text == ""))
 }
 
 
 
+
 # Score the responses (assuming blank != idk)
-pilot_clean$animal1_score = idk(pilot_clean$animal1)
-pilot_clean$animal2_score = idk(pilot_clean$animal2)
-pilot_clean$animal3_score = idk(pilot_clean$animal3)
-pilot_clean$animal4_score = idk(pilot_clean$animal4)
-pilot_clean$animal5_score = idk(pilot_clean$animal5)
-pilot_clean$animal6_score = idk(pilot_clean$animal6)
-pilot_clean$animal7_score = idk(pilot_clean$animal7)
-pilot_clean$animal8_score = idk(pilot_clean$animal8)
-pilot_clean$animal9_score = idk(pilot_clean$animal9)
-pilot_clean$animal10_score = idk(pilot_clean$animal10)
+final_clean$animal1_score_excl = idk(final_clean$animal1)
+final_clean$animal2_score_excl = idk(final_clean$animal2)
+final_clean$animal3_score_excl = idk(final_clean$animal3)
+final_clean$animal4_score_excl = idk(final_clean$animal4)
+final_clean$animal5_score_excl = idk(final_clean$animal5)
+final_clean$animal6_score_excl = idk(final_clean$animal6)
+final_clean$animal7_score_excl = idk(final_clean$animal7)
+final_clean$animal8_score_excl = idk(final_clean$animal8)
+final_clean$animal9_score_excl = idk(final_clean$animal9)
+final_clean$animal10_score_excl = idk(final_clean$animal10)
 
 
 # Score the responses (assuming blank == idk)
-pilot_clean$animal1_score_idk = idk_or_blank(pilot_clean$animal1)
-pilot_clean$animal2_score_idk = idk_or_blank(pilot_clean$animal2)
-pilot_clean$animal3_score_idk = idk_or_blank(pilot_clean$animal3)
-pilot_clean$animal4_score_idk = idk_or_blank(pilot_clean$animal4)
-pilot_clean$animal5_score_idk = idk_or_blank(pilot_clean$animal5)
-pilot_clean$animal6_score_idk = idk_or_blank(pilot_clean$animal6)
-pilot_clean$animal7_score_idk = idk_or_blank(pilot_clean$animal7)
-pilot_clean$animal8_score_idk = idk_or_blank(pilot_clean$animal8)
-pilot_clean$animal9_score_idk = idk_or_blank(pilot_clean$animal9)
-pilot_clean$animal10_score_idk = idk_or_blank(pilot_clean$animal10)
-
+final_clean$animal1_score_incl = idk_including_blank(final_clean$animal1)
+final_clean$animal2_score_incl = idk_including_blank(final_clean$animal2)
+final_clean$animal3_score_incl = idk_including_blank(final_clean$animal3)
+final_clean$animal4_score_incl = idk_including_blank(final_clean$animal4)
+final_clean$animal5_score_incl = idk_including_blank(final_clean$animal5)
+final_clean$animal6_score_incl = idk_including_blank(final_clean$animal6)
+final_clean$animal7_score_incl = idk_including_blank(final_clean$animal7)
+final_clean$animal8_score_incl = idk_including_blank(final_clean$animal8)
+final_clean$animal9_score_incl = idk_including_blank(final_clean$animal9)
+final_clean$animal10_score_incl = idk_including_blank(final_clean$animal10)
 
 
 
 
 # Generate total scores. This is our outcome variable!
-pilot_clean$total_score = (pilot_clean$animal1_score + pilot_clean$animal2_score + pilot_clean$animal3_score
-                        + pilot_clean$animal4_score + pilot_clean$animal5_score + pilot_clean$animal6_score
-                        + pilot_clean$animal7_score + pilot_clean$animal8_score + pilot_clean$animal9_score
-                        + pilot_clean$animal10_score)
+final_clean$total_score_excl = (final_clean$animal1_score_excl + final_clean$animal2_score_excl + final_clean$animal3_score_excl
+                        + final_clean$animal4_score_excl + final_clean$animal5_score_excl + final_clean$animal6_score_excl
+                        + final_clean$animal7_score_excl + final_clean$animal8_score_excl + final_clean$animal9_score_excl
+                        + final_clean$animal10_score_excl)
 
-pilot_clean$total_score_idk = (pilot_clean$animal1_score_idk + pilot_clean$animal2_score_idk + pilot_clean$animal3_score_idk
-                           + pilot_clean$animal4_score_idk + pilot_clean$animal5_score_idk + pilot_clean$animal6_score_idk
-                           + pilot_clean$animal7_score_idk + pilot_clean$animal8_score_idk + pilot_clean$animal9_score_idk
-                           + pilot_clean$animal10_score_idk)
+final_clean$total_score_incl = (final_clean$animal1_score_incl + final_clean$animal2_score_incl + final_clean$animal3_score_incl
+                           + final_clean$animal4_score_incl + final_clean$animal5_score_incl + final_clean$animal6_score_incl
+                           + final_clean$animal7_score_incl + final_clean$animal8_score_incl + final_clean$animal9_score_incl
+                           + final_clean$animal10_score_incl)
 
+# Look at the data to get a sense of how scores differ
+final_clean[final_clean$total_score_incl != final_clean$total_score_excl, c("total_score_incl", "total_score_excl")]
 
 
 # Helpful dummy variables for identifying the different assignments
-pilot_clean$control = as.integer(pilot_clean$group == 'control')
-pilot_clean$treatment = as.integer(pilot_clean$group != 'control')
-pilot_clean$moderate = as.integer(pilot_clean$group == 'moderate')
-pilot_clean$strong = as.integer(pilot_clean$group == 'strong')
+final_clean$control = as.integer(final_clean$group == 'control')
+final_clean$treatment = as.integer(final_clean$group != 'control')
+
+final_clean$moderate = as.integer(final_clean$group == 'moderate')
+final_clean$strong = as.integer(final_clean$group == 'strong')
+
+
+# Define never-takers as those who did not answer any animal questions
+# Those answering up to 9 of the questions will be handled as though
+# they were treatedx
+final_clean$complied = as.integer(final_clean$treatment & 
+                        (final_clean$animal1 != '' | final_clean$animal2 != '' 
+                        | final_clean$animal3 != '' | final_clean$animal4 != ''
+                        | final_clean$animal5 != '' | final_clean$animal6 != ''
+                        | final_clean$animal7 != '' | final_clean$animal8 != ''
+                        | final_clean$animal9 != '' | final_clean$animal10 != ''))
+
+
+final_clean$moderate_complied = as.integer(final_clean$moderate & final_clean$complied)
+final_clean$strong_complied = as.integer(final_clean$strong & final_clean$complied)
+
+
 
 
 # Convert gender to dummy variable
-pilot_clean$male = as.integer(pilot_clean$gender == 'Male')
+final_clean$male = as.integer(final_clean$gender == 'Male')
 
 # Convert Bachelors or higher degree to a dummy variable
-pilot_clean$degree = as.integer(pilot_clean$bachelors == 'Yes')
+final_clean$degree = as.integer(final_clean$bachelors == 'Yes')
 
 # Convert the manipulation check variable into a dummy
-pilot_clean$helpful_treated = as.integer(pilot_clean$helpful != 'I did not see any statistics')
+final_clean$helpful_treated = as.integer(final_clean$helpful != 'I did not see any statistics')
+table(final_clean$helpful_treated)
 
-# Not sure if I should use age or adjusted age here...?
-# Adjusted age produces a more intuitive intercept value, but adds the cognitive
-# overhead of using 24 as the base age. Raw age looks weird because intercept
-# for pilot 2 data winds up being 13, which is an impossible value all on its
-# own.
-pilot_clean$age_adjusted = pilot_clean$age - min(pilot_clean$age)
-# pilot_clean$age_adjusted
+# Using age over 24 (the lowest age observed in the study). Without the adjustment,
+# when the age is included in regressions, the intercept comes out around 13,
+# which seems like an impossible value and can be a bit confusing.
+final_clean$age_over_24 = final_clean$age - min(final_clean$age)
+
+# Convert age over 30 into a dummy variable
+final_clean$over_thirty = as.integer(final_clean$age > 30)
 
 
-pilot_clean$over_thirty = as.integer(pilot_clean$age > 30)
-pilot_clean$over_thirty
+
 
 # Data Analysis
 
 
-# Simplest regression
-summary(lm(total_score ~ treatment, pilot_clean))
-summary(lm(total_score_idk ~ treatment, pilot_clean))
+# Include libraries for IV regression and robust standard errors
+library(AER)
+library(sandwich)
+
+# Use IV/2-stage regression to derive the estimated CACE, including our covariates
+# of interest. We start with the model that excludes blank responses from being
+# counted as IDKs. Having fewer IDKs in treatment will cause the CACE to be
+# overestimated, so we refer to it as the "upper" model since it will become the
+# upper bound in our extreme value bounds.
+model_excl = ivreg(total_score_excl ~ complied + male + age + over_thirty, 
+                                    ~ treatment + male + age + over_thirty,
+                                    data=final_clean)
+upper_model = summary(model_excl)
+upper_bound_cace = upper_model$coefficients[2,1]
+upper_rse = coeftest(model_excl, vcovHC(model_excl))
+upper_robust_se = upper_rse[[4]]
+
+# Check the outputs for the CACE and robust SE
+upper_bound_cace
+upper_robust_se
+
+# Compute the 97.5% quantile for the more extreme effect
+# Signs look a little funny because the effect we are measuring
+# is negative. A greater effect means fewer IDK responses.
+ci_upper = upper_bound_cace - (1.96 * upper_robust_se)
+ci_upper
 
 
-# Separate the 2 levels of treatment
-summary(lm(total_score ~ moderate + strong, pilot_clean))
+# Now run the same model for the "lower" estimate
+model_incl = ivreg(total_score_incl ~ complied + male + age + over_thirty,
+                                    ~ treatment + male + age + over_thirty,
+                                    data=final_clean)
+lower_model = summary(model_incl)
+lower_bound_cace = lower_model$coefficients[2,1]
+lower_rse = coeftest(model_incl, vcovHC(model_incl))
+lower_robust_se = lower_rse[[4]]
 
-# Add covariates
-summary(lm(total_score ~ moderate + strong + male + degree + age_adjusted, pilot_clean))
+# Check outputs
+lower_bound_cace
+lower_robust_se
 
-# Test interaction hypothesis of treatment + male
-summary(lm(total_score ~ treatment * male, pilot_clean))
+# Compute the 2.5% quantile for the less extreme effect
+ci_lower = lower_bound_cace + (1.96 * lower_robust_se)
+ci_lower
 
-# Test interaction hypothesis of treatment + degree
-summary(lm(total_score ~ treatment * degree, pilot_clean))
 
-# Test interaction hypothesis of treatment + age over thirty
-summary(lm(total_score ~ treatment * over_thirty, pilot_clean))
 
