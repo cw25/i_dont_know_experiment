@@ -186,9 +186,11 @@ model_excl = ivreg(total_score_excl ~ complied + male + age + over_thirty,
                                     ~ treatment + male + age + over_thirty,
                                     data=final_clean)
 upper_model = summary(model_excl)
+upper_model
 upper_bound_cace = upper_model$coefficients[2,1]
 upper_rse = coeftest(model_excl, vcovHC(model_excl))
-upper_robust_se = upper_rse[[4]]
+upper_rse
+upper_robust_se = upper_rse[[7]]
 
 # Check the outputs for the CACE and robust SE
 upper_bound_cace
@@ -206,9 +208,11 @@ model_incl = ivreg(total_score_incl ~ complied + male + age + over_thirty,
                                     ~ treatment + male + age + over_thirty,
                                     data=final_clean)
 lower_model = summary(model_incl)
+lower_model
 lower_bound_cace = lower_model$coefficients[2,1]
 lower_rse = coeftest(model_incl, vcovHC(model_incl))
-lower_robust_se = lower_rse[[4]]
+lower_rse
+lower_robust_se = lower_rse[[7]]
 
 # Check outputs
 lower_bound_cace
