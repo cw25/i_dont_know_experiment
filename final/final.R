@@ -240,25 +240,25 @@ summary(model_h2)
 
 
 # Hypotheses 3: Males under treatment will be even less likely than females to answer IDK
-model_h3 = ivreg(total_score_incl ~ complied * male,
-                 ~ treatment * male,
+model_h3 = ivreg(total_score_incl ~ complied * male + degree + over_thirty,
+                 ~ treatment * male + degree + over_thirty,
                  data=final_clean)
 summary(model_h3)
-# Myth: BUSTED, but reason to think twice about it with 0.12 p-value
+# Myth: BUSTED
 
 
 
 # Hypotheses 4: Holders of 4-year college degrees will be even more likely to answer IDK
-model_h4 = ivreg(total_score_incl ~ complied * degree,
-                 ~ treatment * degree,
+model_h4 = ivreg(total_score_incl ~ complied * degree + male + over_thirty,
+                 ~ treatment * degree + male + over_thirty,
                  data=final_clean)
 summary(model_h4)
 # Myth: BUSTED, apparently a lot of variance
 
 
 # Hypotheses 5: 
-model_h5 = ivreg(total_score_incl ~ complied * over_thirty,
-                 ~ treatment * over_thirty,
+model_h5 = ivreg(total_score_incl ~ complied * over_thirty + male + degree,
+                 ~ treatment * over_thirty + male + degree,
                  data=final_clean)
 summary(model_h5)
 # Myth: Seriously BUSTED
