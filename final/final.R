@@ -156,8 +156,7 @@ final_clean$male = as.integer(final_clean$gender == 'Male')
 final_clean$degree = as.integer(final_clean$bachelors == 'Yes')
 
 # Convert the manipulation check variable into a dummy
-final_clean$helpful_treated = as.integer(final_clean$helpful != 'I did not see any statistics')
-table(final_clean$helpful_treated)
+final_clean$stats_helpful = as.integer(final_clean$helpful != 'I did not see any statistics')
 
 # Using age over 24 (the lowest age observed in the study). Without the adjustment,
 # when the age is included in regressions, the intercept comes out around 13,
@@ -239,7 +238,7 @@ summary(model_h2)
 
 
 
-# Hypotheses 3: Males under treatment will be even less likely than females to answer IDK
+# Hypothesis 3: Males under treatment will be even less likely than females to answer IDK
 model_h3 = ivreg(total_score_incl ~ complied * male + degree + over_thirty,
                  ~ treatment * male + degree + over_thirty,
                  data=final_clean)
@@ -248,7 +247,7 @@ summary(model_h3)
 
 
 
-# Hypotheses 4: Holders of 4-year college degrees will be even more likely to answer IDK
+# Hypothesis 4: Holders of 4-year college degrees will be even more likely to answer IDK
 model_h4 = ivreg(total_score_incl ~ complied * degree + male + over_thirty,
                  ~ treatment * degree + male + over_thirty,
                  data=final_clean)
@@ -256,11 +255,20 @@ summary(model_h4)
 # Myth: BUSTED, apparently a lot of variance
 
 
-# Hypotheses 5: 
+# Hypothesis 5: 
 model_h5 = ivreg(total_score_incl ~ complied * over_thirty + male + degree,
                  ~ treatment * over_thirty + male + degree,
                  data=final_clean)
 summary(model_h5)
 # Myth: Seriously BUSTED
+
+
+# Manipulation check
+t.test(
+  final_clean$stats_helpful[final_clean$control == 1 & final_clean$helpful != ''],
+  final_clean$stats_helpful[final_clean$control == 0 & final_clean$helpful != '']
+)
+
+
 
 
