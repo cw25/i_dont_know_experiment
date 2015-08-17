@@ -1,3 +1,25 @@
+---
+title: "I Don't Know - W241 Field Experiments Final Project"
+author: "Christopher Walker"
+date: "August 20, 2015"
+output: pdf_document
+---
+
+
+#Introduction#
+
+This experiment seeks to learn whether people, when faced with questions that they do not know the answers to, will be less likely to admit they do not know when information about previous responses is visible to them. Participants were shown 10 pictures of fake or extremely rare animals and asked to identify them. The outcome variable in this experiment is the total number of responses that were equivalent to "I don't know."
+
+All data, code, and analysis materials related to this assignment can be obtained at: https://github.com/cw25/i_dont_know_experiment
+
+
+
+#Data Collection#
+
+The survey was administered through Qualtrics, with many participants recruited into the study via Amazon Mechanical Turk. We begin by ingesting and joining those two data sets.
+
+
+```{r}
 # Load data files downloaded from Qualtrics and Amazon
 setwd("~/Documents/Berkeley/W241 - Field Experiments/Final Project/final")
 turk_data <- read.csv("final_survey_results_mturk.csv", header=TRUE, sep=",")
@@ -9,11 +31,14 @@ turk_data$surveycode = turk_data$Answer.surveycode
 
 # Join (note: respondents recruited outside of Turk won't have data in the Amazon file)
 final_data_joined <- merge(turk_data, qualtrics_data, all.y = TRUE, by=c("surveycode") ) 
+```
 
 
-# Distill/Clean
+#Data Formatting#
 
+First, we take the subset of columns in the data that is necessary for the analysis, and simplify the names since the names provided by Qualtrics are quite long.
 
+```{r}
 # Limit to the subset of data necessary for the analysis
 final_clean = final_data_joined[, c(
   "group",
@@ -36,11 +61,18 @@ final_clean = final_data_joined[, c(
 
 # Simplify the column names
 colnames(final_clean) = c(
-  "group", "gender", "age", "bachelors", "animal1", "animal2", "animal3", "animal4", "animal5",
-  "animal6", "animal7", "animal8", "animal9", "animal10", "helpful"
+  "group", "gender", "age", "bachelors", "animal1", "animal2", "animal3", "animal4",
+  "animal5", "animal6", "animal7", "animal8", "animal9", "animal10", "helpful"
 )
+```
 
 
+Next, we view all of the responses to the animal identification questions so we can build the list of responses that will be treated as equivalent to "I don't know." We use those values to create a scoring function that we can use to calculate the outcome variable.
+
+The scoring function also has to be defined in a second way, where we treat blanks as IDK responses. In cases where the user did not answer every animal identification question, we can't know what their responses would have been. As a result, we will use these functions to generate two separate models and produce upper and lower bounds on the estimated CACE.
+
+
+```{r}
 # Inspect the IDK values so we can catch and score them properly
 idk_responses = c(as.character(final_clean$animal1), as.character(final_clean$animal2),
                   as.character(final_clean$animal3), as.character(final_clean$animal4),
@@ -48,28 +80,36 @@ idk_responses = c(as.character(final_clean$animal1), as.character(final_clean$an
                   as.character(final_clean$animal7), as.character(final_clean$animal8),
                   as.character(final_clean$animal9))
 
-# View responses
-sort(unique(idk_responses))
+
+# View responses... This is commented out here because of the length of the output
+# sort(unique(idk_responses))
 
 
-# Convert text responses to scores. All variants of "I don't know" are counted as 1, everything else as 0
+# Convert text responses to scores. All variants of "I don't know" are counted as 1,
+# everything else as 0
 idk <- function(text) {
   return(as.integer(text %in% c(
-    " \"I don't know.\"", " I DON'T KNOW", "\"I don't know\"", "80's hair metal Andre Braugher (I don't know)",
-    "I  don't know", "I do not know", "I don;t know", "I don;t know.", "I don't k ow", "I don't kmow",
-    "I don't knkw", "I don't knoe", "i don't know", "I don't know", "I don't Know", "I don't KNOW",
-    "I Don't know", "I DON'T KNOW", "i don't know ", "I don't know ", "I don't Know ", "I don't know - looks like 'nessie' / cgi",
-    "i don't know :(", "I don't know :(", "I don't know, but it's cute", "I don't know!", "I don't know.",
-    "I don't know. ", "I don't know. Looks like a wingless bat!", "I don't know. None of there are real. ",
-    "i don't know...oh come on!", "i don't know...this shit is hard", "I don't konw", "I don't kow",
-    "I don't ky", "I don't lnow", "I don't[ know", "i don'tknow", "I don'tknow", "I don'tknow.",
-    "i dont know", "I dont know", "I dont Know", "i dont know ", "I dont know ", "i dont' know",
-    "I dont' know.", "I dont't know", "I dontknow", "I odn't know", "I really don't know ", "I. Don't know ",
-    "i.dont know", "I've seen this one before... but don't know its name", "albino medusa newt (I don't know)",
-    "Albinodontknow", "don't know", "Don't know", "Don't know ", "dont know", "Dont know", "elephagoat (I don't know)",
-    "glamour pig (I don't know)", "idk", "Idk", "IDK", "Idon't know", "kangaroo mouse? (I don't know)",
-    "medusa salamander (I don't know)", "opossum with super sonic hearing (I don't know)",
-    "Same as the other one I don't know ", "teddy bear with fangs (I don't know)", "What! I don't know "
+    " \"I don't know.\"", " I DON'T KNOW", "\"I don't know\"",
+    "80's hair metal Andre Braugher (I don't know)", "I  don't know", "I do not know",
+    "I don;t know", "I don;t know.", "I don't k ow", "I don't kmow", "I don't knkw",
+    "I don't knoe", "i don't know", "I don't know", "I don't Know", "I don't KNOW",
+    "I Don't know", "I DON'T KNOW", "i don't know ", "I don't know ", "I don't Know ",
+    "I don't know - looks like 'nessie' / cgi", "i don't know :(", "I don't know :(",
+    "I don't know, but it's cute", "I don't know!", "I don't know.", "I don't know. ",
+    "I don't know. Looks like a wingless bat!", "I don't know. None of there are real. ",
+    "i don't know...oh come on!", "i don't know...this shit is hard", "I don't konw",
+    "I don't kow", "I don't ky", "I don't lnow", "I don't[ know", "i don'tknow",
+    "I don'tknow", "I don'tknow.", "i dont know", "I dont know", "I dont Know",
+    "i dont know ", "I dont know ", "i dont' know", "I dont' know.", "I dont't know",
+    "I dontknow", "I odn't know", "I really don't know ", "I. Don't know ", "i.dont know",
+    "I've seen this one before... but don't know its name",
+    "albino medusa newt (I don't know)", "Albinodontknow", "don't know", "Don't know",
+    "Don't know ", "dont know", "Dont know", "elephagoat (I don't know)",
+    "glamour pig (I don't know)", "idk", "Idk", "IDK", "Idon't know",
+    "kangaroo mouse? (I don't know)", "medusa salamander (I don't know)",
+    "opossum with super sonic hearing (I don't know)",
+    "Same as the other one I don't know ", "teddy bear with fangs (I don't know)",
+    "What! I don't know "
   )))
 }
 
@@ -77,10 +117,11 @@ idk <- function(text) {
 idk_including_blank <- function(text) {
   return(as.integer(idk(text) | text == ""))
 }
+```
 
+Now we score the responses using both styles.
 
-
-
+```{r}
 # Score the responses (assuming blank != idk)
 final_clean$animal1_score_excl = idk(final_clean$animal1)
 final_clean$animal2_score_excl = idk(final_clean$animal2)
@@ -107,9 +148,7 @@ final_clean$animal9_score_incl = idk_including_blank(final_clean$animal9)
 final_clean$animal10_score_incl = idk_including_blank(final_clean$animal10)
 
 
-
-
-# Generate total scores. This is our outcome variable!
+# Generate total scores. These are our outcome variables!
 final_clean$total_score_excl = (final_clean$animal1_score_excl + final_clean$animal2_score_excl + final_clean$animal3_score_excl
                         + final_clean$animal4_score_excl + final_clean$animal5_score_excl + final_clean$animal6_score_excl
                         + final_clean$animal7_score_excl + final_clean$animal8_score_excl + final_clean$animal9_score_excl
@@ -120,10 +159,15 @@ final_clean$total_score_incl = (final_clean$animal1_score_incl + final_clean$ani
                            + final_clean$animal7_score_incl + final_clean$animal8_score_incl + final_clean$animal9_score_incl
                            + final_clean$animal10_score_incl)
 
-# Look at the data to get a sense of how scores differ
-final_clean[final_clean$total_score_incl != final_clean$total_score_excl, c("total_score_incl", "total_score_excl")]
+# Uncomment to look at the data to get a sense of how scores differ
+# final_clean[final_clean$total_score_incl != final_clean$total_score_excl, c("total_score_incl", "total_score_excl")]
+```
 
 
+
+
+
+```{r}
 # Helpful dummy variables for identifying the different assignments
 final_clean$control = as.integer(final_clean$group == 'control')
 final_clean$treatment = as.integer(final_clean$group != 'control')
@@ -260,7 +304,7 @@ t.test(
   final_clean$stats_helpful[final_clean$control == 1 & !is.na(final_clean$stats_helpful)],
   final_clean$stats_helpful[final_clean$control == 0 & !is.na(final_clean$stats_helpful)]
 )
-
+```
 
 
 
