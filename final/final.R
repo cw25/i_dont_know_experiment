@@ -147,8 +147,6 @@ final_clean$moderate_complied = as.integer(final_clean$moderate & final_clean$co
 final_clean$strong_complied = as.integer(final_clean$strong & final_clean$complied)
 
 
-
-
 # Convert gender to dummy variable
 final_clean$male = as.integer(final_clean$gender == 'Male')
 
@@ -234,8 +232,6 @@ model_h2 = ivreg(total_score_incl ~ strong_complied + moderate_complied + male +
                                     ~ strong + moderate + male + degree + over_thirty,
                                     data=final_clean)
 summary(model_h2)
-# Myth: BUSTED
-
 
 
 # Hypothesis 3: Males under treatment will be even less likely than females to answer IDK
@@ -243,8 +239,6 @@ model_h3 = ivreg(total_score_incl ~ complied * male + degree + over_thirty,
                  ~ treatment * male + degree + over_thirty,
                  data=final_clean)
 summary(model_h3)
-# Myth: BUSTED
-
 
 
 # Hypothesis 4: Holders of 4-year college degrees will be even more likely to answer IDK
@@ -252,21 +246,19 @@ model_h4 = ivreg(total_score_incl ~ complied * degree + male + over_thirty,
                  ~ treatment * degree + male + over_thirty,
                  data=final_clean)
 summary(model_h4)
-# Myth: BUSTED, apparently a lot of variance
 
 
-# Hypothesis 5: 
+# Hypothesis 5: Participants over the age of 30 receiving the treatment are more likely to answer IDK
 model_h5 = ivreg(total_score_incl ~ complied * over_thirty + male + degree,
                  ~ treatment * over_thirty + male + degree,
                  data=final_clean)
 summary(model_h5)
-# Myth: Seriously BUSTED
 
 
 # Manipulation check
 t.test(
-  final_clean$stats_helpful[final_clean$control == 1 & final_clean$helpful != ''],
-  final_clean$stats_helpful[final_clean$control == 0 & final_clean$helpful != '']
+  final_clean$stats_helpful[final_clean$control == 1 & !is.na(final_clean$stats_helpful)],
+  final_clean$stats_helpful[final_clean$control == 0 & !is.na(final_clean$stats_helpful)]
 )
 
 
