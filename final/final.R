@@ -260,7 +260,7 @@ t.test(
   final_clean$stats_helpful[final_clean$control == 1 & !is.na(final_clean$stats_helpful)],
   final_clean$stats_helpful[final_clean$control == 0 & !is.na(final_clean$stats_helpful)]
 )
-
+ 
 
 
 
