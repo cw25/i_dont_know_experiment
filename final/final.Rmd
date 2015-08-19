@@ -10,7 +10,9 @@ output: pdf_document
 
 This experiment seeks to learn whether people, when faced with questions that they do not know the answers to, will be less likely to admit they do not know when information about previous responses is visible to them. Participants were shown 10 pictures of fake or extremely rare animals and asked to identify them. The outcome variable in this experiment is the total number of responses that were equivalent to "I don't know."
 
-All data, code, and analysis materials related to this assignment can be obtained at: https://github.com/cw25/i_dont_know_experiment
+All data, code, and analysis materials related to this assignment can be obtained at:
+
+https://github.com/cw25/i_dont_know_experiment
 
 
 
@@ -122,7 +124,7 @@ idk_including_blank <- function(text) {
 Now we score the responses using both styles.
 
 ```{r}
-# Score the responses (assuming blank != idk)
+# Score the responses (assuming blank != IDK)
 final_clean$animal1_score_excl = idk(final_clean$animal1)
 final_clean$animal2_score_excl = idk(final_clean$animal2)
 final_clean$animal3_score_excl = idk(final_clean$animal3)
@@ -135,7 +137,7 @@ final_clean$animal9_score_excl = idk(final_clean$animal9)
 final_clean$animal10_score_excl = idk(final_clean$animal10)
 
 
-# Score the responses (assuming blank == idk)
+# Score the responses (assuming blank == IDK)
 final_clean$animal1_score_incl = idk_including_blank(final_clean$animal1)
 final_clean$animal2_score_incl = idk_including_blank(final_clean$animal2)
 final_clean$animal3_score_incl = idk_including_blank(final_clean$animal3)
@@ -149,22 +151,29 @@ final_clean$animal10_score_incl = idk_including_blank(final_clean$animal10)
 
 
 # Generate total scores. These are our outcome variables!
-final_clean$total_score_excl = (final_clean$animal1_score_excl + final_clean$animal2_score_excl + final_clean$animal3_score_excl
-                        + final_clean$animal4_score_excl + final_clean$animal5_score_excl + final_clean$animal6_score_excl
-                        + final_clean$animal7_score_excl + final_clean$animal8_score_excl + final_clean$animal9_score_excl
-                        + final_clean$animal10_score_excl)
+final_clean$total_score_excl = (
+                        final_clean$animal1_score_excl + final_clean$animal2_score_excl
+                        + final_clean$animal3_score_excl + final_clean$animal4_score_excl
+                        + final_clean$animal5_score_excl + final_clean$animal6_score_excl
+                        + final_clean$animal7_score_excl + final_clean$animal8_score_excl
+                        + final_clean$animal9_score_excl + final_clean$animal10_score_excl)
 
-final_clean$total_score_incl = (final_clean$animal1_score_incl + final_clean$animal2_score_incl + final_clean$animal3_score_incl
-                           + final_clean$animal4_score_incl + final_clean$animal5_score_incl + final_clean$animal6_score_incl
-                           + final_clean$animal7_score_incl + final_clean$animal8_score_incl + final_clean$animal9_score_incl
-                           + final_clean$animal10_score_incl)
+final_clean$total_score_incl = (
+                        final_clean$animal1_score_incl + final_clean$animal2_score_incl
+                        + final_clean$animal3_score_incl + final_clean$animal4_score_incl
+                        + final_clean$animal5_score_incl + final_clean$animal6_score_incl
+                        + final_clean$animal7_score_incl + final_clean$animal8_score_incl
+                        + final_clean$animal9_score_incl + final_clean$animal10_score_incl)
 
-# Uncomment to look at the data to get a sense of how scores differ
-# final_clean[final_clean$total_score_incl != final_clean$total_score_excl, c("total_score_incl", "total_score_excl")]
+# Uncomment this to see how the two scores differ across all records
+# final_clean[
+#   final_clean$total_score_incl != final_clean$total_score_excl,
+#   c("total_score_incl", "total_score_excl")
+# ]
 ```
 
 
-
+We create a few dummy variables that will be helpful during our regression analysis, particularly for the covariates of interest in this study: gender (is the participant male?), age (is the participant over 30?), and education (does the participant hold a Bachelors or higher degree?). 
 
 
 ```{r}
@@ -177,8 +186,8 @@ final_clean$strong = as.integer(final_clean$group == 'strong')
 
 
 # Define never-takers as those who did not answer any animal questions
-# Those answering up to 9 of the questions will be handled as though
-# they were treatedx
+# Those answering any of the animal identification questions will be
+# handled as though they were treated
 final_clean$complied = as.integer(final_clean$treatment & 
                         (final_clean$animal1 != '' | final_clean$animal2 != '' 
                         | final_clean$animal3 != '' | final_clean$animal4 != ''
@@ -197,23 +206,27 @@ final_clean$male = as.integer(final_clean$gender == 'Male')
 # Convert Bachelors or higher degree to a dummy variable
 final_clean$degree = as.integer(final_clean$bachelors == 'Yes')
 
-# Convert the manipulation check variable into a dummy
-final_clean$stats_helpful = as.integer(final_clean$helpful != 'I did not see any statistics')
-
-# Using age over 24 (the lowest age observed in the study). Without the adjustment,
-# when the age is included in regressions, the intercept comes out around 13,
-# which seems like an impossible value and can be a bit confusing.
-final_clean$age_over_24 = final_clean$age - min(final_clean$age)
-
 # Convert age over 30 into a dummy variable
 final_clean$over_thirty = as.integer(final_clean$age > 30)
 
+# Convert the manipulation check variable into a dummy
+final_clean$stats_helpful = as.integer(final_clean$helpful != 'I did not see any statistics')
+```
 
 
 
-# Data Analysis
+# The Primary Hypothesis
+
+_Respondents will give fewer “I don’t know” (or equivalent) responses when summary statistics about previous responses are visible._
+
+In order to compute an estimate of the effect, we generate two models using the two styles of outcome scores that we computed earlier. The first is the "exclusive" or "upper" model where blanks are treated as non-IDK responses, and the magnitude of the effect is greater. The second is the "inclusive" or "lower" model that treats all blanks as IDK responses, and the magnitude of the effect is smaller.
+
+Since we had some noncompliance in the study, and we can't discount the possibility that the treatment itself caused it, we treat those cases as Never-Takers and estimate the effect by calculating the complier average causal effect (CACE). To do this, we use 2-stage regression models, including our covariates of interest.
+
+In order to bracket the true effect size, we use an extreme value bounds strategy. We take the 2.5% quantile for the low extreme and the 97.5% quantile for the high extreme, giving us a very conservative estimate of the range where we can expect the true effect size to live.
 
 
+```{r, message=FALSE}
 # Include libraries for IV regression and robust standard errors
 library(AER)
 library(sandwich)
@@ -227,21 +240,20 @@ model_excl = ivreg(total_score_excl ~ complied + male + degree + over_thirty,
                                     ~ treatment + male + degree + over_thirty,
                                     data=final_clean)
 upper_model = summary(model_excl)
-upper_model
 upper_bound_cace = upper_model$coefficients[2,1]
-upper_rse = coeftest(model_excl, vcovHC(model_excl))
-upper_rse
-upper_robust_se = upper_rse[[7]]
+upper_model
 
-# Check the outputs for the CACE and robust SE
-upper_bound_cace
-upper_robust_se
+# Compute robust standard errors for the model
+upper_rse = coeftest(model_excl, vcovHC(model_excl))
+upper_robust_se = upper_rse[[7]]
+upper_rse
+
 
 # Compute the 97.5% quantile for the more extreme effect
 # Signs look a little funny because the effect we are measuring
 # is negative. A greater effect means fewer IDK responses.
-ci_upper = upper_bound_cace - (1.96 * upper_robust_se)
-ci_upper
+excl_ci_upper_bound = upper_bound_cace + (1.96 * upper_robust_se)
+excl_ci_lower_bound = upper_bound_cace - (1.96 * upper_robust_se)
 
 
 # Now run the same model for the "lower" estimate
@@ -249,62 +261,117 @@ model_incl = ivreg(total_score_incl ~ complied + male + degree + over_thirty,
                                     ~ treatment + male + degree + over_thirty,
                                     data=final_clean)
 lower_model = summary(model_incl)
-lower_model
 lower_bound_cace = lower_model$coefficients[2,1]
-lower_rse = coeftest(model_incl, vcovHC(model_incl))
-lower_rse
-lower_robust_se = lower_rse[[7]]
+lower_model
 
-# Check outputs
-lower_bound_cace
-lower_robust_se
+# Compute robust standard errors for the model
+lower_rse = coeftest(model_incl, vcovHC(model_incl))
+lower_robust_se = lower_rse[[7]]
+lower_rse
+
 
 # Compute the 2.5% quantile for the less extreme effect
-ci_lower = lower_bound_cace + (1.96 * lower_robust_se)
-ci_lower
+incl_ci_upper_bound = lower_bound_cace + (1.96 * lower_robust_se)
+incl_ci_lower_bound = lower_bound_cace - (1.96 * lower_robust_se)
+```
 
 
+Both models report a highly significant treatment effect (p < 0.0001), but with different CACEs (as expected).
+
+The "exclusive" model reports a confidence interval of (`r excl_ci_lower_bound`, `r excl_ci_upper_bound`).
+
+The "inclusive" model reports a confidence interval of (`r incl_ci_lower_bound`, `r incl_ci_upper_bound`).
+
+Taking the two extremes from the separate models, our conservative extreme value bounds estimate of the CACE is (`r excl_ci_lower_bound`, `r incl_ci_upper_bound`).
 
 
-# Use the inclusive model since it represents the lesser effect (stay conservative)
-# and investigate the additional hypotheses
+#Additional Hypotheses#
+
+To investigate the remaining hypotheses, we begin by investigating the "inclusive" model, which reports the more conservative effect size. Should any of the models produce significant results, the "exclusive" model can also be generated to produce extreme value bounds estimates of the effect size.
 
 
+#Hypothesis 2#
+
+_Seeing highly confident summary statistics will lead to a greater reduction in IDK responses than seeing moderately confident summary statistics._
+
+```{r}
 # Hypothesis 2: Seeing highly confident summary statistics will lead to a greater reduction in IDK
 # responses than seeing moderately confident summary statistics
 model_h2 = ivreg(total_score_incl ~ strong_complied + moderate_complied + male + degree + over_thirty,
                                     ~ strong + moderate + male + degree + over_thirty,
                                     data=final_clean)
 summary(model_h2)
+```
+
+The two levels of treatment report very similar effects, with a great deal of overlap between their respective confidence intervals. The confidence interval for the moderate treatment effect is () and the confidence interval for the strong treatment effect is (`r `, `r `). If there were a significant difference between these two value, we would expect to see no overlap between the intervals, but in fact we do.
+
+We therefore fail to reject the null hypothesis that there is any difference in the effect of the moderate treatment and the strong treatment.
 
 
+#Hypothesis 3#
+
+_Males receiving the treatment will be less likely than females to answer IDK._
+
+```{r}
 # Hypothesis 3: Males under treatment will be even less likely than females to answer IDK
 model_h3 = ivreg(total_score_incl ~ complied * male + degree + over_thirty,
                  ~ treatment * male + degree + over_thirty,
                  data=final_clean)
 summary(model_h3)
+```
+
+The coefficient for the term interacting males with the treatment has a p-value of `r `, and is not a significant result. Thus, we also fail to reject the null hypothesis that there is no difference in the effect among males and females.
 
 
+#Hypothesis 4#
+
+_Holders of 4-year college degrees receiving the treatment will be even more likely to answer IDK than those who do not hold degrees._
+
+```{r}
 # Hypothesis 4: Holders of 4-year college degrees will be even more likely to answer IDK
 model_h4 = ivreg(total_score_incl ~ complied * degree + male + over_thirty,
                  ~ treatment * degree + male + over_thirty,
                  data=final_clean)
 summary(model_h4)
+```
 
 
+The coefficient for the term interacting 4-year college degree holders with the treatment has a p-value of `r `, and is not a significant result. We fail to reject the null hypothesis that there is no difference in the effect between participants with or without 4-year degrees.
+
+
+#Hypothesis 5#
+
+_Participants whose age is over 30 years old who receive the treatment will be more likely to answer IDK than those aged 30 years or younger._
+
+```{r}
 # Hypothesis 5: Participants over the age of 30 receiving the treatment are more likely to answer IDK
 model_h5 = ivreg(total_score_incl ~ complied * over_thirty + male + degree,
                  ~ treatment * over_thirty + male + degree,
                  data=final_clean)
 summary(model_h5)
+```
 
 
+The coefficient for the term interacting participants aged over 30 with the treatment has a p-value of `r `, and is not a significant result. And finally, we fail to reject the null hypothesis that there is no difference in effect between those whose age is over 30 and those who are 30 and under.
+
+
+# Manipulation Check
+
+As a sanity check on treatment delivery, we also test the assignment of participants to treatment and control groups.
+
+
+```{r}
 # Manipulation check
 t.test(
   final_clean$stats_helpful[final_clean$control == 1 & !is.na(final_clean$stats_helpful)],
   final_clean$stats_helpful[final_clean$control == 0 & !is.na(final_clean$stats_helpful)]
 )
-```
 
+
+t.test(
+  final_clean$stats_helpful[final_clean$strong == 1 & !is.na(final_clean$stats_helpful)],
+  final_clean$stats_helpful[final_clean$moderate == 1 & !is.na(final_clean$stats_helpful)]
+)
+```
 
 
