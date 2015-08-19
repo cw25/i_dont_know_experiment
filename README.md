@@ -4,7 +4,7 @@ Are people less likely to admit they don’t know the answer to a questions when
 
 I conducted this field experiment to answer that question as part of my coursework for my Masters program at UC Berkeley. Data were collected through Qualtrics surveys and participants were recruited through personal appeals and Amazon Mechanical Turk.
 
-Analysis code is written in R, captured in an RMarkdown document for use with RStudio, and used to produce the final PDF write-up document.
+I've tried to capture all materials used in the experiment here. Analysis code is written in R, captured in an RMarkdown document for use with RStudio, and used to produce the final PDF write-up document using RStudio's knitr integration.
 
 If you have questions about the experiment, results, or anything else, I'm happy to answer questions at: chris.walker@ischool.berkeley.edu
 
