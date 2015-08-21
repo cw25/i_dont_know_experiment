@@ -8,9 +8,9 @@ output: pdf_document
 
 #Introduction#
 
-This experiment seeks to learn whether people, when faced with questions that they do not know the answers to, will be less likely to admit they do not know when information about previous responses is visible to them. Participants were shown 10 pictures of fake or extremely rare animals and asked to identify them. The outcome variable in this experiment is the total number of responses that were equivalent to "I don't know."
+This experiment seeks to learn whether people, when faced with questions that they do not know the answers to, will be less likely to admit they do not know when information about previous responses is visible to them. Participants were shown 10 pictures of fake or extremely obscure animals and asked to identify them. The outcome variable in this experiment is the total number of responses that were equivalent to "I don't know."
 
-All data, code, and analysis materials related to this assignment can be obtained at:
+All data, code, and analysis materials related to this assignment can be found at:
 
 https://github.com/cw25/i_dont_know_experiment
 
@@ -173,7 +173,7 @@ final_clean$total_score_incl = (
 ```
 
 
-We create a few dummy variables that will be helpful during our regression analysis, particularly for the covariates of interest in this study: gender (is the participant male?), age (is the participant over 30?), and education (does the participant hold a Bachelors or higher degree?). 
+We create a few dummy variables that will be helpful during our regression analysis, particularly for the covariates of interest in this study: gender (is the participant male?), age (is the participant over 30?), and education (does the participant hold a Bachelor's or higher degree?). 
 
 
 ```{r}
@@ -215,13 +215,13 @@ final_clean$stats_helpful = as.integer(final_clean$helpful != 'I did not see any
 
 
 
-# The Primary Hypothesis
+#The Primary Hypothesis#
 
 _Respondents will give fewer “I don’t know” (or equivalent) responses when summary statistics about previous responses are visible._
 
-In order to compute an estimate of the effect, we generate two models using the two styles of outcome scores that we computed earlier. The first is the "exclusive" or "upper" model where blanks are treated as non-IDK responses, and the magnitude of the effect is greater. The second is the "inclusive" or "lower" model that treats all blanks as IDK responses, and the magnitude of the effect is smaller.
+In order to compute an estimate of the effect, we generate two models, using the two styles of outcome scores that we computed earlier. The first is the "exclusive" or "upper" model where blanks are treated as non-IDK responses, and the magnitude of the estimated effect is greater. The second is the "inclusive" or "lower" model that treats all blanks as IDK responses, and the magnitude of the estimated effect is smaller.
 
-Since we had some noncompliance in the study, and we can't discount the possibility that the treatment itself caused it, we treat those cases as Never-Takers and estimate the effect by calculating the complier average causal effect (CACE). To do this, we use 2-stage regression models, including our covariates of interest.
+Since we had some non-compliance in the study, and we can't discount the possibility that the treatment itself caused it, we treat those cases as Never-Takers and estimate the effect by calculating the complier average causal effect (CACE). To do this, we use 2-stage regression models, including our covariates of interest.
 
 In order to bracket the true effect size, we use an extreme value bounds strategy. We take the 2.5% quantile for the low extreme and the 97.5% quantile for the high extreme, giving us a very conservative estimate of the range where we can expect the true effect size to live.
 
@@ -287,7 +287,7 @@ Taking the two extremes from the separate models, our conservative extreme value
 
 #Additional Hypotheses#
 
-To investigate the remaining hypotheses, we begin by investigating the "inclusive" model, which reports the more conservative effect size. Should any of the models produce significant results, the "exclusive" model can also be generated to produce extreme value bounds estimates of the effect size.
+To investigate the remaining hypotheses, we use the "inclusive" model, which reports the more conservative effect size. (Had any of these additional models produced significant results, the "exclusive" model could have also been generated to produce extreme value bounds estimates of their effect sizes.)
 
 
 #Hypothesis 2#
@@ -295,17 +295,25 @@ To investigate the remaining hypotheses, we begin by investigating the "inclusiv
 _Seeing highly confident summary statistics will lead to a greater reduction in IDK responses than seeing moderately confident summary statistics._
 
 ```{r}
-# Hypothesis 2: Seeing highly confident summary statistics will lead to a greater reduction in IDK
-# responses than seeing moderately confident summary statistics
 model_h2 = ivreg(total_score_incl ~ strong_complied + moderate_complied + male + degree + over_thirty,
                                     ~ strong + moderate + male + degree + over_thirty,
                                     data=final_clean)
-summary(model_h2)
+mh2 = summary(model_h2)
+mh2
 ```
 
-The two levels of treatment report very similar effects, with a great deal of overlap between their respective confidence intervals. The confidence interval for the moderate treatment effect is () and the confidence interval for the strong treatment effect is (`r `, `r `). If there were a significant difference between these two value, we would expect to see no overlap between the intervals, but in fact we do.
+The two levels of treatment report very similar effects, with a great deal of overlap between their respective confidence intervals. The confidence interval for the moderate treatment effect is (`r mh2$coefficients[3,1] + (1.96 * mh2$coefficients[3,2])`, `r mh2$coefficients[3,1] - (1.96 * mh2$coefficients[3,2])`) and the confidence interval for the strong treatment effect is (`r mh2$coefficients[2,1] + (1.96 * mh2$coefficients[2,2])`, `r mh2$coefficients[2,1] - (1.96 * mh2$coefficients[2,2])`).
 
-We therefore fail to reject the null hypothesis that there is any difference in the effect of the moderate treatment and the strong treatment.
+Given the sizable overlap in the two confidence intervals, we suspect that there is no significant difference between the treatments. We use a basic t-test to formally check our hypothesis.
+
+```{r}
+t.test(
+  final_clean$total_score_incl[final_clean$strong_complied == 1],
+  final_clean$total_score_incl[final_clean$moderate_complied == 1]
+)
+```
+
+The test does not yield a statistically significant result. We therefore fail to reject the null hypothesis that there is no difference between the effect of the moderate treatment and the strong treatment.
 
 
 #Hypothesis 3#
@@ -313,14 +321,13 @@ We therefore fail to reject the null hypothesis that there is any difference in 
 _Males receiving the treatment will be less likely than females to answer IDK._
 
 ```{r}
-# Hypothesis 3: Males under treatment will be even less likely than females to answer IDK
-model_h3 = ivreg(total_score_incl ~ complied * male + degree + over_thirty,
-                 ~ treatment * male + degree + over_thirty,
-                 data=final_clean)
-summary(model_h3)
+h3_stage1 = lm(complied ~ treatment + male + degree + over_thirty, data=final_clean)
+h3_stage2 = lm(total_score_incl ~ h3_stage1$fitted.values * male + degree + over_thirty, data = final_clean)
+mh3 = summary(h3_stage2)
+mh3
 ```
 
-The coefficient for the term interacting males with the treatment has a p-value of `r `, and is not a significant result. Thus, we also fail to reject the null hypothesis that there is no difference in the effect among males and females.
+The interaction term representing males under treatment has a p-value of `r mh3$coefficients[4,4]`, not a statistically significant result. Thus, we fail to reject the null hypothesis that males and females are equally likely to answer IDK when receiving the treatment.
 
 
 #Hypothesis 4#
@@ -328,36 +335,34 @@ The coefficient for the term interacting males with the treatment has a p-value 
 _Holders of 4-year college degrees receiving the treatment will be even more likely to answer IDK than those who do not hold degrees._
 
 ```{r}
-# Hypothesis 4: Holders of 4-year college degrees will be even more likely to answer IDK
-model_h4 = ivreg(total_score_incl ~ complied * degree + male + over_thirty,
-                 ~ treatment * degree + male + over_thirty,
-                 data=final_clean)
-summary(model_h4)
+h4_stage1 = lm(complied ~ treatment + degree + male + over_thirty, data=final_clean)
+h4_stage2 = lm(total_score_incl ~ h4_stage1$fitted.values * degree + male + over_thirty, data = final_clean)
+mh4 = summary(h4_stage2)
+mh4
 ```
 
 
-The coefficient for the term interacting 4-year college degree holders with the treatment has a p-value of `r `, and is not a significant result. We fail to reject the null hypothesis that there is no difference in the effect between participants with or without 4-year degrees.
+The coefficient for the term interacting 4-year college degree holders with the treatment has a p-value of `r mh4$coefficients[6,4]`, and is not a statistically significant result. We fail to reject the null hypothesis that there is no difference in the effect between participants with or without 4-year degrees.
 
 
 #Hypothesis 5#
 
-_Participants whose age is over 30 years old who receive the treatment will be more likely to answer IDK than those aged 30 years or younger._
+_Participants over 30 years old who receive the treatment will be more likely to answer IDK than those aged 30 years or younger._
 
 ```{r}
-# Hypothesis 5: Participants over the age of 30 receiving the treatment are more likely to answer IDK
-model_h5 = ivreg(total_score_incl ~ complied * over_thirty + male + degree,
-                 ~ treatment * over_thirty + male + degree,
-                 data=final_clean)
-summary(model_h5)
+h5_stage1 = lm(complied ~ treatment + degree + male + over_thirty, data=final_clean)
+h5_stage2 = lm(total_score_incl ~ h5_stage1$fitted.values * over_thirty + male + degree, data = final_clean)
+mh5 = summary(h5_stage2)
+mh5
 ```
 
 
-The coefficient for the term interacting participants aged over 30 with the treatment has a p-value of `r `, and is not a significant result. And finally, we fail to reject the null hypothesis that there is no difference in effect between those whose age is over 30 and those who are 30 and under.
+The coefficient for the term interacting participants aged over 30 with the treatment has a p-value of `r mh5$coefficients[6,4]`, and is not a significant result. And finally, we fail to reject the null hypothesis that there is no difference in effect between those whose age is over 30 and those who are 30 and under.
 
 
 # Manipulation Check
 
-As a sanity check on treatment delivery, we also test the assignment of participants to treatment and control groups.
+And, as a sanity check on delivery of the treatment, we also test the assignment of participants to treatment and control groups to make sure we do not have significant differences. Assignment to the two levels of treatment is also checked to ensure there were no differences.
 
 
 ```{r}
@@ -366,12 +371,18 @@ t.test(
   final_clean$stats_helpful[final_clean$control == 1 & !is.na(final_clean$stats_helpful)],
   final_clean$stats_helpful[final_clean$control == 0 & !is.na(final_clean$stats_helpful)]
 )
+```
+
+As expected, the test for difference in means yields a significant result, indicating the treatment was successfully delivered.
 
 
+```{r}
 t.test(
   final_clean$stats_helpful[final_clean$strong == 1 & !is.na(final_clean$stats_helpful)],
   final_clean$stats_helpful[final_clean$moderate == 1 & !is.na(final_clean$stats_helpful)]
 )
 ```
+
+Also as expected, no significant difference in means was found between delivery rates for the two levels of treatment.
 
 
