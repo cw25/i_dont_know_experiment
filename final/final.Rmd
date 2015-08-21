@@ -18,7 +18,7 @@ https://github.com/cw25/i_dont_know_experiment
 
 #Data Collection#
 
-The survey was administered through Qualtrics, with many participants recruited into the study via Amazon Mechanical Turk. We begin by ingesting and joining those two data sets.
+The survey was administered through Qualtrics. Many participants recruited into the study via Amazon Mechanical Turk, and the rest via personal appeals. We begin by ingesting and joining those two data sets.
 
 
 ```{r}
@@ -295,9 +295,10 @@ To investigate the remaining hypotheses, we use the "inclusive" model, which rep
 _Seeing highly confident summary statistics will lead to a greater reduction in IDK responses than seeing moderately confident summary statistics._
 
 ```{r}
-model_h2 = ivreg(total_score_incl ~ strong_complied + moderate_complied + male + degree + over_thirty,
-                                    ~ strong + moderate + male + degree + over_thirty,
-                                    data=final_clean)
+model_h2 = ivreg(total_score_incl
+                 ~ strong_complied + moderate_complied + male + degree + over_thirty,
+                 ~ strong + moderate + male + degree + over_thirty,
+                 data=final_clean)
 mh2 = summary(model_h2)
 mh2
 ```
@@ -322,12 +323,15 @@ _Males receiving the treatment will be less likely than females to answer IDK._
 
 ```{r}
 h3_stage1 = lm(complied ~ treatment + male + degree + over_thirty, data=final_clean)
-h3_stage2 = lm(total_score_incl ~ h3_stage1$fitted.values * male + degree + over_thirty, data = final_clean)
+h3_stage2 = lm(
+  total_score_incl~ h3_stage1$fitted.values * male + degree + over_thirty,
+  data = final_clean
+)
 mh3 = summary(h3_stage2)
 mh3
 ```
 
-The interaction term representing males under treatment has a p-value of `r mh3$coefficients[4,4]`, not a statistically significant result. Thus, we fail to reject the null hypothesis that males and females are equally likely to answer IDK when receiving the treatment.
+The interaction term representing males under treatment has a p-value of `r mh3$coefficients[6,4]`, not a statistically significant result. Thus, we fail to reject the null hypothesis that males and females are equally likely to answer IDK when receiving the treatment.
 
 
 #Hypothesis 4#
@@ -336,7 +340,10 @@ _Holders of 4-year college degrees receiving the treatment will be even more lik
 
 ```{r}
 h4_stage1 = lm(complied ~ treatment + degree + male + over_thirty, data=final_clean)
-h4_stage2 = lm(total_score_incl ~ h4_stage1$fitted.values * degree + male + over_thirty, data = final_clean)
+h4_stage2 = lm(
+  total_score_incl ~ h4_stage1$fitted.values * degree + male + over_thirty,
+  data = final_clean
+)
 mh4 = summary(h4_stage2)
 mh4
 ```
@@ -351,13 +358,16 @@ _Participants over 30 years old who receive the treatment will be more likely to
 
 ```{r}
 h5_stage1 = lm(complied ~ treatment + degree + male + over_thirty, data=final_clean)
-h5_stage2 = lm(total_score_incl ~ h5_stage1$fitted.values * over_thirty + male + degree, data = final_clean)
+h5_stage2 = lm(
+  total_score_incl ~ h5_stage1$fitted.values * over_thirty + male + degree,
+  data = final_clean
+)
 mh5 = summary(h5_stage2)
 mh5
 ```
 
 
-The coefficient for the term interacting participants aged over 30 with the treatment has a p-value of `r mh5$coefficients[6,4]`, and is not a significant result. And finally, we fail to reject the null hypothesis that there is no difference in effect between those whose age is over 30 and those who are 30 and under.
+The coefficient for the term interacting participants aged over 30 with the treatment has a p-value of `r mh5$coefficients[6,4]`, and is not a significant result. We fail to reject the null hypothesis that there is no difference in effect between those whose age is over 30 and those who are 30 and under.
 
 
 # Manipulation Check
