@@ -1,7 +1,7 @@
 ---
 title: "I Don't Know - W241 Field Experiments Final Project"
 author: "Christopher Walker"
-date: "August 20, 2015"
+date: "August 22, 2015"
 output: pdf_document
 ---
 
@@ -10,7 +10,7 @@ output: pdf_document
 
 This experiment seeks to learn whether people, when faced with questions that they do not know the answers to, will be less likely to admit they do not know when information about previous responses is visible to them. Participants were shown 10 pictures of fake or extremely obscure animals and asked to identify them. The outcome variable in this experiment is the total number of responses that were equivalent to "I don't know."
 
-All data, code, and analysis materials related to this assignment can be found at:
+All data, code, and analysis materials related to this experiment can be found at:
 
 https://github.com/cw25/i_dont_know_experiment
 
@@ -384,15 +384,5 @@ t.test(
 ```
 
 As expected, the test for difference in means yields a significant result, indicating the treatment was successfully delivered.
-
-
-```{r}
-t.test(
-  final_clean$stats_helpful[final_clean$strong == 1 & !is.na(final_clean$stats_helpful)],
-  final_clean$stats_helpful[final_clean$moderate == 1 & !is.na(final_clean$stats_helpful)]
-)
-```
-
-Also as expected, no significant difference in means was found between delivery rates for the two levels of treatment.
 
 
