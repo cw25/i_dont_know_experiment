@@ -80,7 +80,7 @@ idk_responses = c(as.character(final_clean$animal1), as.character(final_clean$an
                   as.character(final_clean$animal3), as.character(final_clean$animal4),
                   as.character(final_clean$animal5), as.character(final_clean$animal6),
                   as.character(final_clean$animal7), as.character(final_clean$animal8),
-                  as.character(final_clean$animal9))
+                  as.character(final_clean$animal9), as.character(final_clean$animal10))
 
 
 # View responses... This is commented out here because of the length of the output
@@ -111,7 +111,8 @@ idk <- function(text) {
     "kangaroo mouse? (I don't know)", "medusa salamander (I don't know)",
     "opossum with super sonic hearing (I don't know)",
     "Same as the other one I don't know ", "teddy bear with fangs (I don't know)",
-    "What! I don't know "
+    "What! I don't know ", "evil spider newt (I don't know)", "I don't knew", "I don't known",
+    "Mandelbrot fractral (I don't know)"
   )))
 }
 
@@ -295,12 +296,17 @@ To investigate the remaining hypotheses, we use the "inclusive" model, which rep
 _Seeing highly confident summary statistics will lead to a greater reduction in IDK responses than seeing moderately confident summary statistics._
 
 ```{r}
+# Report the regression results
 model_h2 = ivreg(total_score_incl
                  ~ strong_complied + moderate_complied + male + degree + over_thirty,
                  ~ strong + moderate + male + degree + over_thirty,
                  data=final_clean)
 mh2 = summary(model_h2)
 mh2
+
+# Robust standard errors
+mh2_rse = coeftest(model_h2, vcovHC(model_h2))
+mh2_rse
 ```
 
 The two levels of treatment report very similar effects, with a great deal of overlap between their respective confidence intervals. The confidence interval for the moderate treatment effect is (`r mh2$coefficients[3,1] + (1.96 * mh2$coefficients[3,2])`, `r mh2$coefficients[3,1] - (1.96 * mh2$coefficients[3,2])`) and the confidence interval for the strong treatment effect is (`r mh2$coefficients[2,1] + (1.96 * mh2$coefficients[2,2])`, `r mh2$coefficients[2,1] - (1.96 * mh2$coefficients[2,2])`).
