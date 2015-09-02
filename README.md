@@ -4,7 +4,7 @@ Are people less likely to admit they don’t know the answer to a questions when
 
 I conducted this field experiment to answer that question as part of my coursework for my Masters program at UC Berkeley. Data were collected through Qualtrics surveys and participants were recruited through personal appeals and Amazon Mechanical Turk.
 
-I've tried to capture all materials used in the experiment here. Analysis code is written in R, captured in an RMarkdown document for use with RStudio, and used to produce the final PDF write-up document using RStudio's knitr integration.
+I've tried to capture all materials used in the experiment here. Analysis code is written in R, captured in an [RMarkdown document for use with RStudio](https://github.com/cw25/i_dont_know_experiment/blob/master/final/final.Rmd), and used to produce the [final technical write-up](https://github.com/cw25/i_dont_know_experiment/blob/master/final/final.pdf) document using RStudio's knitr integration. [The final paper](https://github.com/cw25/i_dont_know_experiment/blob/master/final/Final%20Paper.pdf) is also available for download.
 
 If you have questions about the experiment, results, or anything else, I'm happy to answer questions at: chris.walker@ischool.berkeley.edu
 
@@ -60,6 +60,8 @@ If you have questions about the experiment, results, or anything else, I'm happy
 **A:** I was able to show that the presence of the statistics did indeed have a significant effect on people's tendency to answer IDK. Using a conservative estimation strategy, people answered IDK 2 - 3.5 fewer times when presented with the summary stats (p < 0.001).
 
 If you'd like to read the technical write-up with all the R code and statistical nerdery, you can find it here: https://github.com/cw25/i_dont_know_experiment/blob/master/final/final.pdf
+
+If you want to read the slightly less nerdy version, with all the gory details about the experimental design, etc., you can find it here: https://github.com/cw25/i_dont_know_experiment/blob/master/final/Final%20Paper.pdf
 
 -
 
