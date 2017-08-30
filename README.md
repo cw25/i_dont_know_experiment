@@ -17,42 +17,42 @@ If you have questions about the experiment, results, or anything else, I'm happy
 
 **A:** 8 out of 10 were real. The original plan was to have 10 fake animals, but believable fake animal images are really hard to find! In the end, I had to settle for using pictures of very obscure animals instead.
 
--
+***
 
 
 **Q:** When I took the survey, I saw people's previous responses. Didn't that affect people's answers?
 
 **A:** Yes, exactly! The true purpose of the study was to find out whether the presence of statistics changed how frequently people would admit that they didn't know the answer. My hypothesis was that people would answer IDK less frequently if they could see previous responses.
 
--
+***
 
 
 **Q:** Wait, back to the animals... Why did it matter if they were real or fake?
 
 **A:** I wanted to measure how frequently people admitted that they didn't know the answer. The best way to do that is to present people with a question where it is guaranteed that they don't know the answer. If they know the real identity of the animal, they wouldn't face the choice that I was interested in studying. That's why I tried to use highly obscure animals when I couldn't find good fake ones.
 
--
+***
 
 
 **Q:** So, were the previous response statistics real?
 
 **A:** Nope. Totally fake!
 
--
+***
 
 
 **Q:** Hang on, I didn't see statistics! What the heck?
 
 **A:** That means you were part of the experiment's control group. I measured the frequency of IDK responses both with stats (treatment) and without stats (control), then compared the results to measure the effect that the stats had.
 
--
+***
 
 
 **Q:** I knew some of the animals. What does that mean?
 
 **A:** The fact that some animals were identifiable does introduce some questions about the validity of the results for this experiment. A future version of this experiment could improve things by finding a full set of 10 fake animals. If you're interested in how this problem affects the experiment's validity, or about the validity of the experiment in general, check out the full paper where this and other concerns are raised.
 
--
+***
 
 
 **Q:** What were the final results of the experiment?
@@ -63,7 +63,7 @@ If you'd like to read the technical write-up with all the R code and statistical
 
 If you want to read the slightly less nerdy version, with all the gory details about the experimental design, etc., you can find it here: https://github.com/cw25/i_dont_know_experiment/blob/master/final/Final%20Paper.pdf
 
--
+***
 
 
 **Q:** I feel so unsatisfied. Can I ask more questions?
