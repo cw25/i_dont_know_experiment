@@ -1,4 +1,4 @@
-#I Don't Know#
+# I Don't Know
 
 Are people less likely to admit they don’t know the answer to a questions when they can see other people’s previous responses?
 
@@ -10,7 +10,7 @@ If you have questions about the experiment, results, or anything else, I'm happy
 
 ***
 
-#Frequently Asked Questions#
+# Frequently Asked Questions
 
 
 **Q:** _(This was the most common question...)_ Were the animals real?
